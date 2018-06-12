@@ -1,119 +1,79 @@
 <template>
-	 <div class="auto-complete">
+	 <div class="autocomplete">
 		<input 
 			type="text"
-			v-model="inputText"
-			@keydown.tab.prevent="complete(0)"
-			@focus="focus(true)" 
-			@blur="focus(false)"
+			v-model="search"
+			@input="onChange"
 		>
-		<table v-show="focused">
-			<tbody>
-				<tr 
-					v-for="(person, i) in filteredPersons"
-					:key="person.id"
-					@mousedown="complete(i)"
-				>
-					<td>{{ person[field] }}</td>
-				</tr>
-			</tbody>
-		</table>
+		<ul
+			v-show="isOpen"
+			class="autocomplete-results"
+		>
+			<li 
+				v-for="person in persons"
+				:key="person.id"
+				@click="setResult(person)"
+				class="autocomplete-result"
+			>
+				{{ person.name }}
+			</li>
+		</ul>
 	</div>
 </template>
 
 <script>
 export default {
   props: {
-    value: { type: String, required: false },
-    persons: { type: Array, required: true },
-    field: { type: String, required: true }
+    persons: { type: Array, required: true, default: () => [] }
   },
   data() {
     return {
-			inputText: '',
-			focused: false
+      search: '',
+      results: [],
+      isOpen: false
     };
   },
-  // when the object is created
-  created() {
-    this.inputText = this.value || '';
-  },
-  updated() {
-    this.$emit('input', this.inputText);
-  },
-  computed: {
-    filteredPersons() {
-      return this.persons.filter(
-        person => person[this.field].indexOf(this.inputText) != -1
-      );
-    }
-  },
   methods: {
-    complete(i) {
-			this.inputText = this.filteredPersons[i][this.field];
+    onChange() {
+      this.isOpen = true;
+      this.filterResults();
     },
-    focus(f) {
-      this.focused = f;
+    filterResults() {
+      this.results = this.persons.filter(
+        item => item.name.toLowerCase().indexOf(this.search.toLowerCase()) > -1
+      );
+    },
+    setResult(person) {
+      this.search = person.name;
+      this.isOpen = false;
     }
   }
 };
 </script>
 
 <style>
-#app {
-  padding: 25px;
-  background: #efefef;
-  color: #555;
-  font-family: helvetica;
+.autocomplete {
+  position: relative;
+  width: 130px;
 }
 
-.form-group {
-  margin-bottom: 10px;
+.autocomplete-results {
+  padding: 0;
+  margin: 0;
+  border: 1px solid #eeeeee;
+  height: 120px;
+  overflow: auto;
 }
 
-input {
-  height: 20px;
-  border-radius: 3px;
-  border: 2px solid #888;
-  padding: 5px 10px;
-  transition: all 0.5s ease-out 0s;
-  width: 200px;
-}
-
-input:focus {
-  outline: none;
-  border-color: #2196f3;
-  border-radius: 0px;
-}
-
-.auto-complete input.has-error {
-  border-color: #f44336;
-}
-
-.auto-complete table {
-  position: absolute;
-  width: 224px;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-  border: 2px solid #888;
-  border-top: 0px;
+.autocomplete-result {
+  list-style: none;
+  text-align: left;
+  padding: 4px 2px;
   cursor: pointer;
 }
 
-.auto-complete table tr {
-  background: white;
-}
-
-.auto-complete table tr td {
-  padding: 10px;
-}
-
-.auto-complete table tr:nth-child(even) {
-  background: #eee;
-}
-
-.auto-complete table tr:hover {
-  background: #2196f3;
+.autocomplete-result:hover {
+  background-color: #4aae9b;
   color: white;
 }
 </style>

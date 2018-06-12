@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import persons from './person-data';
 import AutoComplete from './components/auto-complete.vue';
 
 export default {
@@ -14,11 +15,7 @@ export default {
   },
   data() {
     return {
-      persons: [
-        { id: 2, name: 'Jeff', age: 32 },
-        { id: 1, name: 'Paul', age: 24 },
-        { id: 3, name: 'Gwen', age: 27 }
-      ]
+      persons
     };
   }
 };

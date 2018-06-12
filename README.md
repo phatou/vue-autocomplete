@@ -1,6 +1,7 @@
 # vue-autocomplete
 
 > A Vue.js project
+> Based on https://dev.to/bdzanis/autocomplete-using-vuejs-4k2k
 
 ## Build Setup
 

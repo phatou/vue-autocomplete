@@ -4,16 +4,20 @@
 			type="text"
 			v-model="search"
 			@input="onChange"
+			@keyup.down="onArrowDown"
+			@keyup.up="onArrowUp"
+			@keyup.enter="onEnter"
 		>
 		<ul
-			v-show="isOpen"
+			v-show="isOpen && results.length > 0"
 			class="autocomplete-results"
 		>
 			<li 
-				v-for="person in persons"
+				v-for="(person, i) in results"
 				:key="person.id"
 				@click="setResult(person)"
 				class="autocomplete-result"
+				:class="{ 'is-active': i === arrowCounter }"
 			>
 				{{ person.name }}
 			</li>
@@ -30,13 +34,46 @@ export default {
     return {
       search: '',
       results: [],
-      isOpen: false
+      isOpen: false,
+      arrowCounter: 0
     };
   },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  destroyed() {
+    document.removeEventListener('click', this.handleClickOutside);
+  },
   methods: {
+    handleClickOutside(evt) {
+      if (!this.$el.contains(evt.target)) {
+        this.isOpen = false;
+        this.arrowCounter = -1;
+      }
+    },
+    onArrowDown() {
+      if (this.arrowCounter < this.results.length) {
+        this.arrowCounter = this.arrowCounter + 1;
+      }
+    },
+    onArrowUp() {
+      if (this.arrowCounter > 0) {
+        this.arrowCounter = this.arrowCounter - 1;
+      }
+    },
+    onEnter() {
+      if (this.arrowCounter !== -1) {
+        this.search = this.results[this.arrowCounter].name;
+      }
+      this.isOpen = false;
+      this.arrowCounter = -1;
+    },
     onChange() {
       this.isOpen = true;
       this.filterResults();
+      if (this.results.length > 0) {
+        this.arrowCounter = 0;
+      }
     },
     filterResults() {
       this.results = this.persons.filter(
@@ -72,6 +109,7 @@ export default {
   cursor: pointer;
 }
 
+.autocomplete-result.is-active,
 .autocomplete-result:hover {
   background-color: #4aae9b;
   color: white;
